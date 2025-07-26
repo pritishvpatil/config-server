@@ -6,3 +6,136 @@ eureka:
        defaultZone: http://localhost:8761/eureka/
    instance:
     hostname: localhost  
+
+reverse-mapping:
+  column-mapping: [NPE_ID, TYPE_NAME, MANDATORY_IND, DEFAULT_VALUE]
+  MI_OTHER_NPE_ATTRS:
+    Device:
+      battery: BATTERY
+      config: CONFIG
+      name: ELEMENT ID
+      comments: EPS_NOTES
+      firmwareVersion: F/W VERSION
+      hardwareRevision: H/W REVISION
+      generationRevision: GEN REVISION
+      latitude: LAT
+      longitude: LONG
+      macAddress: MAC_ADDRESS
+      powerType: OPTION
+      pgsId: PGS ID
+      powerId: PWRID
+      powerState: PWR_STATUS
+      release: RELEASE
+      softwareProductionStatus: S/W PROD STATUS
+      softwareVersion: S/W VERSION
+      sheathId: SHEATH ID
+
+    Rack:
+      battery: BATTERY
+      hardwareRevision: H/W REVISION
+      mountingRailWidth: MOUNTING RAILS
+      pgsId: PGS ID
+      powerId: PWRID
+      layout: RACK LAYOUT
+      release: RELEASE
+      Enum_itamProductCategory:
+        ASAM: ITAMASAM
+        AXD: ITAMAXD
+        AXE: ITAMAXE
+        CAN RADIO: ITAMCAN RADIO
+        CMUX: ITAMCMUX
+        DDN: ITAMDDN
+        DPN: ITAMDPN
+        DRCS: ITAMDRCS
+        DSL: ITAMDSL
+        FTTP: ITAMFTTP
+        GGSN: ITAMGGSN
+        ISAM: ITAMISAM
+        ITERRA: ITAMITERRA
+        NORTEL DMS: ITAMNORTEL DMS
+        PDH ENV: ITAMPDH ENV
+        RADIO PDH: ITAMRADIO PDH
+        RADIO SDH: ITAMRADIO SDH
+        RIM: ITAMRIM
+        S12: ITAMS12
+        SCN: ITAMSCN
+        SDH NGSDH: ITAMSDH NGSDH
+        SDN: ITAMSDN
+
+    Tray:
+      hardwareRevision: H/W REVISION
+      power: POWER_STRING
+      sheath: SHEATH ID
+
+    Antenna:
+      band: FREQUENCY TX
+      hardwareRevision: H/W REVISION
+      receiveFrequencyMhz: RECEIVE_FREQ
+      softwareRevision: S/W REVISION
+      subBand: SUB_BAND
+      transmitFrequencyMhz: TRANSMIT_FREQ
+
+    Battery:
+      installDate: BATTERY
+      circuitBreakerRating: BATT_CB_RATING
+      generationRevision: GEN REVISION
+      hardwareRevision: H/W REVISION
+
+    Card:
+      battery: BATTERY
+      config: CONFIG
+      comments: EPS_NOTES
+      firmwareVersion: F/W VERSION
+      generationRevision: GEN REVISION
+      hardwareRevision: H/W REVISION
+      hps: HPS
+      memoryBank1: MEMORY BANK 1
+      memoryBank2: MEMORY BANK 2
+      pgsId: PGS ID
+      powerState: PWR_STATUS
+      release: RELEASE
+      softwareProductionStatus: S/W PROD STATUS
+      softwareVersion: S/W VERSION
+      sheathId: SHEATH ID
+      bitRate: BIT_RATE
+
+    Item:
+      batteryType: BATTERY_TYPE
+      config: CONFIG
+      name: ELEMENT ID
+      comments: EPS_NOTES
+      firmwareVersion: F/W VERSION
+      receiveFrequency: FREQUENCY RX
+      hardwareRevision: H/W REVISION
+      memoryBank1: MEMORY BANK 1
+      memoryBank2: MEMORY BANK 2
+      pgsId: PGS ID
+      release: RELEASE
+      softwareProductionStatus: S/W PROD STATUS
+      softwareVersion: S/W VERSION
+      sheathId: SHEATH ID
+
+    Drawer:
+      hardwareRevision: H/W REVISION
+      sheath: SHEATH ID
+
+    TerminalBlock:
+      hardwareRevision: H/W REVISION
+
+    Filter:
+      hardwareRevision: H/W REVISION
+
+    CircuitProtection:
+      hardwareRevision: H/W REVISION
+
+    FuseHolder:
+      hardwareRevision: H/W REVISION
+
+    SolarPanel:
+      hardwareRevision: H/W REVISION
+
+    CableSet:
+      hardwareRevision: H/W REVISION
+      supplier: SUPPLIER
+
+  csvFilePath: ./src/main/resources/reverse-migration-files/
