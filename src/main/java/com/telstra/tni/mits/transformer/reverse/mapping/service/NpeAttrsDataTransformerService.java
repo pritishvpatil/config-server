@@ -36,11 +36,13 @@ public class NpeAttrsDataTransformerService {
             String jsonProp = entry.getKey();
             Object mappingValue = entry.getValue();
 
-            // Case 1: Simple key-value pair
-            if (mappingValue instanceof String) {
-                JsonNode valueNode = item.get(jsonProp);
-                if (valueNode != null && !valueNode.isNull() && !valueNode.asText().isEmpty()) {
-                    String npeId = resolveNpeId(item, objectType);
+            // Special handling for Device and Rack objects with battery/config properties
+            if (("Device".equals(objectType) || "Rack".equals(objectType)) && 
+                ("battery".equals(jsonProp) || "config".equals(jsonProp))) {
+                
+                JsonNode propertyNode = item.get(jsonProp);
+                if (propertyNode != null && !propertyNode.isNull() && !propertyNode.asText().isEmpty()) {
+                    String npeId = resolveNpeIdFromAssociatedType(item, objectType);
                     if (npeId == null || npeId.isEmpty()) continue;
 
                     String typeName = (String) mappingValue;
@@ -54,35 +56,57 @@ public class NpeAttrsDataTransformerService {
                     row.add("NONE");
                     rows.add(row);
                 }
+            }
+            // Standard processing for other cases
+            else {
+                // Case 1: Simple key-value pair
+                if (mappingValue instanceof String) {
+                    JsonNode valueNode = item.get(jsonProp);
+                    if (valueNode != null && !valueNode.isNull() && !valueNode.asText().isEmpty()) {
+                        String npeId = resolveNpeId(item, objectType);
+                        if (npeId == null || npeId.isEmpty()) continue;
 
-            // Case 2: Enum mapping (nested Map<String, String>)
-            } else if (mappingValue instanceof Map) {
-                JsonNode enumValueNode = item.get(jsonProp);
-                if (enumValueNode != null && !enumValueNode.isNull() && !enumValueNode.asText().isEmpty()) {
-                    String enumKey = enumValueNode.asText();
+                        String typeName = (String) mappingValue;
+                        String dedupKey = npeId + "|" + typeName;
+                        if (!seenNpeIdTypeName.add(dedupKey)) continue;
 
-                    Map<?, ?> enumMapRaw = (Map<?, ?>) mappingValue;
+                        List<String> row = new ArrayList<>();
+                        row.add(npeId);
+                        row.add(typeName);
+                        row.add("N");
+                        row.add("NONE");
+                        rows.add(row);
+                    }
 
-                    // Use only string keys and values
-                    if (enumMapRaw.keySet().stream().allMatch(k -> k instanceof String) &&
-                        enumMapRaw.values().stream().allMatch(v -> v instanceof String)) {
+                // Case 2: Enum mapping (nested Map<String, String>)
+                } else if (mappingValue instanceof Map) {
+                    JsonNode enumValueNode = item.get(jsonProp);
+                    if (enumValueNode != null && !enumValueNode.isNull() && !enumValueNode.asText().isEmpty()) {
+                        String enumKey = enumValueNode.asText();
 
-                        Map<String, String> enumMap = (Map<String, String>) enumMapRaw;
-                        String typeName = enumMap.get(enumKey);
+                        Map<?, ?> enumMapRaw = (Map<?, ?>) mappingValue;
 
-                        if (typeName != null && !typeName.isEmpty()) {
-                            String npeId = resolveNpeId(item, objectType);
-                            if (npeId == null || npeId.isEmpty()) continue;
+                        // Use only string keys and values
+                        if (enumMapRaw.keySet().stream().allMatch(k -> k instanceof String) &&
+                            enumMapRaw.values().stream().allMatch(v -> v instanceof String)) {
 
-                            String dedupKey = npeId + "|" + typeName;
-                            if (!seenNpeIdTypeName.add(dedupKey)) continue;
+                            Map<String, String> enumMap = (Map<String, String>) enumMapRaw;
+                            String typeName = enumMap.get(enumKey);
 
-                            List<String> row = new ArrayList<>();
-                            row.add(npeId);
-                            row.add(typeName);
-                            row.add("N");
-                            row.add("NONE");
-                            rows.add(row);
+                            if (typeName != null && !typeName.isEmpty()) {
+                                String npeId = resolveNpeId(item, objectType);
+                                if (npeId == null || npeId.isEmpty()) continue;
+
+                                String dedupKey = npeId + "|" + typeName;
+                                if (!seenNpeIdTypeName.add(dedupKey)) continue;
+
+                                List<String> row = new ArrayList<>();
+                                row.add(npeId);
+                                row.add(typeName);
+                                row.add("N");
+                                row.add("NONE");
+                                rows.add(row);
+                            }
                         }
                     }
                 }
@@ -92,6 +116,32 @@ public class NpeAttrsDataTransformerService {
         return rows;
     }
 
+
+    /**
+     * Resolves NPE ID specifically from the associated type for Device and Rack objects.
+     * This method is used for battery and config properties of Device/Rack objects.
+     */
+    private String resolveNpeIdFromAssociatedType(JsonNode item, String objectType) {
+        String assocKey = "_ASSOCIATED_" + objectType.toUpperCase() + "_TYPE";
+        JsonNode associatedNode = item.get(assocKey);
+
+        if (associatedNode != null && !associatedNode.isNull()) {
+            // First try to get npeId from associated type
+            JsonNode npeIdNode = associatedNode.get("npeId");
+            if (npeIdNode != null && !npeIdNode.isNull() && !npeIdNode.asText().isEmpty()) {
+                return npeIdNode.asText();
+            }
+
+            // If npeId not available, try to get id from associated type
+            JsonNode idNode = associatedNode.get("id");
+            if (idNode != null && !idNode.isNull() && !idNode.asText().isEmpty()) {
+                return idNode.asText();
+            }
+        }
+
+        // No fallback to _typeId for Device/Rack battery/config properties
+        return null;
+    }
 
     private String resolveNpeId(JsonNode item, String objectType) {
         String assocKey = "_ASSOCIATED_" + objectType.toUpperCase() + "_TYPE";
